@@ -193,7 +193,7 @@ function typewriterjackee()
 	trig SetHintString("");
 	trig SetCursorHint("HINT_NOICON");
 	fxModel = util::spawn_model("tag_origin", trig.origin);
-	specialrewarditcount = 9;
+	specialrewarditcount = 7;
 	e_bool = false;
 	firstrew = 0;
 	//level waittill("initial_blackscreen_passed");
@@ -208,7 +208,12 @@ function typewriterjackee()
 			wait(0.25);
 		}
 		fxModel Delete();
-		choices = 4 + iteration;
+		//Cap choices to not be able to go over 7, anything greater than that is way too difficult to remember.
+		if(choices != 7)
+		{
+			choices = 2 + iteration;
+		}
+		if(choices > 7) choices = 7;
 		if(choices >= specialrewarditcount)
 		{
 			if(RandomInt(5) == 0 || firstrew == 0) 
@@ -254,7 +259,6 @@ function blinkorder(vasearray, choices, e_bool, spot, poweruppool)
 				//IPrintLnBold(vasearray[k].script_int);
 				jackvasesrewardspotfx = struct::get(vasearray[k].target,"targetname");
 				thread PlayFxWithCleanup(level._effect["powerup_grabbed"], jackvasesrewardspotfx.origin, 2);
-
 				wait(1.5);
 				continue;
 			}
