@@ -196,6 +196,7 @@ function typewriterjackee()
 	specialrewarditcount = 7;
 	e_bool = false;
 	firstrew = 0;
+	choices = 0;
 	//level waittill("initial_blackscreen_passed");
 	while(1)
 	{
@@ -1964,6 +1965,8 @@ function cakewait(fxspot)
 		WAIT_SERVER_FRAME;
 		PlayFXOnTag("dlc1/castle/fx_light_candle_flicker_castle", seatinginteractfx, "tag_origin");
 		level.cakefinalfxlight PlaySound("cake153soundtrig");
+		//give player max ammo
+		level thread zm_powerups::specific_powerup_drop("full_ammo", player.origin, undefined, undefined, undefined, undefined, false );
 		wait(20);
 		foreach(item in level.cakeshootspots)
 		{
