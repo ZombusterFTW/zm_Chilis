@@ -200,7 +200,7 @@ function ringphone(string)
 			foreach(player in GetPlayers())
 			{
 				///if(player IsTouching(radius))
-				if(Distance(player.origin, level.nexusphone.origin)<= 75)
+				if(Distance(player.origin, level.nexusphone.origin)<= 125)
 				{
 					playersinrange ++;
 				}
