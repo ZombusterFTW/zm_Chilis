@@ -32,6 +32,9 @@
 
 #using scripts\shared\ai\zombie_utility;
 
+
+//This file is no longer used in the map since around 2020. I wrote this script before I learned how loops worked lmao.
+
 function autoexec pacertestinit()
 {
     level.positioncheck = GetEnt("pacerpositioncheck", "targetname");
