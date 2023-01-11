@@ -174,6 +174,8 @@ function autoexec mainquestinit()
 	level thread navcardrandomization();
 	level thread zulubodies();
 	level thread element153tube();
+	level thread checkround153();
+	level flag::wait_till("zm_settings_menu_complete");
 	if(level.mainquestdebug)
 	{
 		wait(2);
@@ -191,6 +193,20 @@ function autoexec mainquestinit()
 	level thread branchscenetest();
 	wait(10);
 	level notify("teleport_returned");
+}
+
+
+function checkround153()
+{
+	while(1)
+	{
+		level waittill("start_of_round");
+		if(level.round_number == 153) 
+		{
+			IPrintLnBold("Round 153 reached");
+			thread zm_subtitles::subtitle_display(undefined, 3, "^1Chilis", "[Now Playing]: Unholy Confessions by Avenged Sevenfold.");
+		}
+	}
 }
 
 
