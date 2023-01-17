@@ -443,6 +443,7 @@ function zombiedeathcheckcanister()
 function tempbuyableending()
 {
 	buyableendingcost = 153000;
+	buyableendingincrement = 2000;
 	box = GetEnt("soulboxhahalol", "targetname");
 	while(1)
 	{
@@ -498,26 +499,58 @@ function tempbuyableending()
 			player PlayLocalSound("defaultfail");
 			continue;
 		}
-		else if(player.score < buyableendingcost)
+		else
 		{
+			//take money in 2000 dollar incriments instead of taking all of the players cash
+			//Check for cases where the player's total money is less than the incriment, less than the incriment but greater than the remaining cost, and where the incriement is greater than the remaining cost. 
 			level notify("moneyaddedtoending");
-			buyableendingcost = buyableendingcost - player.score;
-			player zm_score::minus_to_player_score(player.score); 
 			player PlayLocalSound("zmb_cha_ching");
-			
-
-		}
-		else if(player.score >= buyableendingcost)
-		{
-			level notify("moneyaddedtoending");
-			player zm_score::minus_to_player_score(buyableendingcost); 
-			buyableendingcost = 0;
-			player PlayLocalSound("zmb_cha_ching");
-			box thread checkremainingcost(buyableendingcost);
-		}
-		if(buyableendingcost == 0) break;
-		wait(0.1);
+			//if the players score is less than the increment we can still take their money but we need to do a little math first
+			if(player.score < buyableendingincrement)
+			{
+				//first lets check if their score is enough to completely pay for the remaining ending balance
+				if(player.score => buyableendingcost)
+				{
+					//if this is the case we take the remaining ending balance from their points
+					player zm_score::minus_to_player_score(buyableendingcost);
+					//and then set the remaining cost to 0
+					buyableendingcost = 0;
+				}
+				//if the player doesn't have enough to pay for the balance fully
+				else
+				{
+					//we subtract their total points from the buyable ending cost
+					buyableendingcost = buyableendingcost - player.score;
+					//we take all of the players' points
+					player zm_score::minus_to_player_score(player.score); 
+				}
+				
+			}
+			//if the players' score is greater than or equal to the buyable ending increment
+			else if(player.score => buyableendingincrement)
+			{
+				//if the increment is more than the remaining cost of the buyable ending
+				if(buyableendingincrement > buyableendingcost)
+				{
+					//take only the remaining points required to play for the ending from the player, instead of a full increment.
+					player zm_score::minus_to_player_score(buyableendingcost);
+					//set the buyable ending cost to 0 as it has been paid for
+					buyableendingcost = 0;
+				}
+				//if the increment isn't greater than the remaining cost
+				else
+				{
+					//we subtract the increment of points from the remaining cost
+					buyableendingcost = buyableendingcost - buyableendingincrement;
+					//we subtract the full increment from the players' points
+					player zm_score::minus_to_player_score(buyableendingincrement); 
+				}
+			}
+		//we check now if the remaining cost is less than or equal to zero(this value shouldn't be zero, unless there is a logic error in this code.). If the cost is zero or less break the loop.
+		if(buyableendingcost <= 0) break;
+		wait(0.05);
 	}
+	//We end the game.
 	foreach(player in GetPlayers())
 	{
 		player EnableInvulnerability();
@@ -530,6 +563,7 @@ function tempbuyableending()
 
 function checkremainingcost(cost)
 {
+	//Allow the player to knife a spot to be told the remaining buyable ending cost. Each time money is contributed this function breaks at the endon and restarts to give the current remaining cost.
 	level endon("moneyaddedtoending");
 	level endon("end_game");
 	self SetCanDamage(1);
@@ -617,6 +651,7 @@ function navcardrandomization()
 
 function autoexec sourcefoglighttest()
 {
+	//should make a failsafe bool per player to determine the map state to prevent the lighting state from overriding a set one. etc the nullzone segment of chilis.
 	//level endon("intermission");
 	//level waittill("initial_blackscreen_passed");
 	//IPrintLnBold("fog test work");
@@ -635,6 +670,7 @@ function autoexec sourcefoglighttest()
 
 function foglightplayertrigsource(bank, light, up)
 {
+	level waittill("power_on");
 	level endon("intermission");
 	while(1)
 	{
