@@ -1059,7 +1059,7 @@ function teleporttonormalhallway()
 		level.questycodenumber = 0;
 		wait(4);
 		level thread speak_to_players("vox_terminalai_heslying");
-		thread zm_subtitles::subtitle_display(undefined, 3, "^1Unknown", "He's lying...");
+		thread zm_subtitles::subtitle_display(undefined, 3, "Unknown", "^3He's lying...");
 }
 
 function questy153moment()

@@ -29,7 +29,9 @@ function init()
 	level.nsz_debug = false; 			// Used to bug test and display features
 	level.temp_room_time = 10; 			// The amount of time in the temp rooms
 	level.chance_to_rand = 0; 			// The chance to spawn in a random room. The higher the num the lower the chance. 0 is 100% chance. 1 is %50
+	level.thesourcerandomtp = true;     //When true the player may be randomly teleported to the source.
 	// ================ End: Variables You Can Change if You Like :End =====================
+	level.sourceeetriggered = false;
 	level.startteleportfx = "dlc5/theater/fx_teleport_initiate";
 	level.playerteleportfxplayer = "dlc5/theater/fx_teleport_player_flash";
 	//level.teleportfinalbeam = "dlc0/factory/fx_teleporter_beam_factory";
@@ -44,6 +46,7 @@ function init()
 	level.teleportdetectplayerzombies = GetEnt("kinoteleporterzombieskilplayerdetect", "targetname");
 	level.tele_room_spots = struct::get_array( "tele_room_org", "targetname" );
 	level.mainframe_spots = struct::get_array( "mainframe_org", "targetname" ); 
+	level.thesourcespots = struct::get_array( "upperforesttelespots", "targetname" );
 	level.black_spots = struct::get_array( "black_orgs", "targetname" );
 	level.oildisappear = "dlc1/castle/fx_elec_teleport_flash_sm";
 	level.teleportbeamfxjaunt = "dlc0/factory/fx_teleporter_beam_factory";
@@ -145,6 +148,18 @@ function main()
 			level.teleport_trigger SetHintString( "Hold ^3[{+activate}]^7 to Use Teleporter" ); 
 			level.teleport_trigger waittill( "trigger", player ); 
 		}
+		if(level.thesourcerandomtp == true && level.sourceeetriggered == false)
+		{
+			//comment this to guarantee this event
+			sourcechance = RandomIntRange( 0, 2 );
+			//sourcechance = 1;
+			if(sourcechance == 1)
+			{
+				//Uncomment for debug
+				//IPrintLnBold("Random chance TP activated");
+				//level.sourceeetriggered = true;
+			}
+		}
 		thread PlayFxWithCleanup(KINO_SWIRL2, level.teleport_trigger.origin, 5);
 		thread PlayFxWithCleanup(KINO_SWIRL2, level.mainframetelefx.origin, 5);
 		level.teleport_trigger SetHintString( "" ); 
@@ -159,8 +174,10 @@ function main()
 		}
 
 		time_to_wait = GetTime() + 2200; 
+		allplayerstouching = false;
 		while(GetTime() < time_to_wait)
 		{
+			allplayerstouching = checkplayerfunction();
 			for( i=0;i<players.size;i++ )
 			{
 				if( players[i] isTouching(level.teleportdetectplayerzombies) )
@@ -173,6 +190,10 @@ function main()
 						{
 								players[i].quedtoteleport = true;
 								nsz_iprintlnbold( "^3Case Teleport to Random" );
+								//if(sourcechance == 1 && level.sourceeetriggered == false)
+								//{
+									//players[i] thread tele_to_temp_room_thesource( level.time_in_pap*1.5, players[i].characterIndex); 
+								//}
 								players[i] thread tele_to_temp_room( level.time_in_pap, players[i].characterIndex); 
 								//teleporter_sounds(); 	
 						}
@@ -190,6 +211,8 @@ function main()
 			wait(0.05);	
 		}
 
+		
+
 		if(level.aresoulcanistersfilledee == true)
 		{
 			teleportingplayercount = 0;
@@ -200,7 +223,6 @@ function main()
 				{
 					teleportingplayercount ++;
 				}
-				
 			}
 			if(teleportingplayercount == players.size)
 			{
@@ -213,6 +235,25 @@ function main()
 				}
 				PlaySoundAtPosition("timebombactivate",(0,0,0));
 			}
+		}
+
+		//Main EE teaser
+		if(allplayerstouching && sourcechance == 1 && level.sourceeetriggered == false)
+		{	level notify("endallkinoteleports");
+			players = GetPlayers();
+			for(i = 0; i < players.size; i++)
+			{
+				players[i] thread tele_to_temp_room_thesource( level.time_in_pap*1.5, players[i].characterIndex);
+			}
+		}
+
+
+		//Source teleportation main EE teaser
+		if(sourcechance == 1 && level.sourceeetriggered == false)
+		{
+			IPrintLnBold("Warning: Teleporter Malfunction!");
+			PlaySoundAtPosition("timebombactivate",(0,0,0));
+			level.sourceeetriggered = true;
 		}
 
 		level notify("initiatekinoteleportsequence");
@@ -231,6 +272,18 @@ function main()
 		wait( level.cooldown_time );
 		teleportercooldownfxspawn Delete(); 
 	}
+}
+
+
+function checkplayerfunction()
+{
+	count = 0;
+	foreach(player in GetPlayers())
+	{
+		if(player IsTouching(level.teleportdetectplayerzombies)) count++;
+	}
+
+	return count == GetPlayers().size;
 }
 
 
@@ -288,6 +341,31 @@ function tele_to_temp_room( time, num )
 	self DisableOffhandWeapons(); 
 	nsz_iprintlnbold( "The Amount of Time Spent in PaP is Customizable" ); 
 	wait( level.temp_room_time ); 
+	self tele_to_room( time, num );
+}
+
+function tele_to_temp_room_thesource( time, num )
+{
+	level endon( "endallkinoteleports" );
+	self move_to_rand_room_temp( level.thesourcespots, num, true); 
+	thread PlayFxWithCleanup(level.playerteleportfxplayer, self.origin, time);
+	self DisableWeapons(); 
+	self DisableOffhandWeapons(); 
+	nsz_iprintlnbold( "The Amount of Time Spent in PaP is Customizable" ); 
+	//wait(2);
+	//music plays
+	self PlayLocalSound("demisechilisthesource");
+	totaltime = 35;
+	textarray = array("It's me again.", "I will speak this way forward.", "They cannot hear me.", "You've been here before.", "It all started here.", "For the good of us all, don't let these events repeat once again...");
+	int = 0;
+	foreach(string in textarray)
+	{
+		ClientPrint(self, "^3"+textarray[int]);
+		wait(totaltime/textarray.size);
+		int ++;
+	}
+	//wait(35); 
+	self StopLocalSound("demisechilisthesource");
 	self tele_to_room( time, num );
 }
 
@@ -363,12 +441,13 @@ function move_to_room( spawns, player_num )
 	self playsound( "kino_beam_fx" );
 }
 
-function move_to_rand_room_temp( spawns, player_num )
+function move_to_rand_room_temp( spawns, player_num, specialtp = false )
 { 
 	level endon( "endallkinoteleports" );
 	self SetElectrified( 3.5 ); 
 	self playlocalsound( "kino_cooldown" ); 
 	level waittill("initiatekinoteleportsequence");
+	if(specialtp) self notify("playerhasteleportedchilis");
 	//wait( 2.5 ); 
 	PlaySoundAtPosition( "kino_beam_fx", self.origin ); 
 	self stopsound( "kino_cooldown" );

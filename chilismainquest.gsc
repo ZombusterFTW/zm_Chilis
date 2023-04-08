@@ -130,8 +130,8 @@ function autoexec mainquestinit()
 	//clientfield::register( "world", "thesourcefx",	VERSION_SHIP, 1, "int" );
 	//Set both of us to false WHEN TESTING OR FULL RELEASE
 	level.islevelbranch = false;
-	level.mainquestdisabled = false;
-	level.mainquestdebug = true;
+	level.mainquestdisabled = true;
+	level.mainquestdebug = false;
 	level.dimensionalinstablefx = "dlc4/genesis/fx_sophia_elec_charge_teleporter";
 	level.leavedoorbarrierfx = "dlc1/castle/fx_infused_115_airspace_sm_barricade_rise";
 	level.oilappear = "dlc0/factory/fx_teleporter_beam_factory";
@@ -174,8 +174,10 @@ function autoexec mainquestinit()
 	level thread navcardrandomization();
 	level thread zulubodies();
 	level thread element153tube();
-	level thread checkround153();
-	level flag::wait_till("zm_settings_menu_complete");
+	//level thread checkround153();
+	//uncomment if settings menu enabled
+	//level flag::wait_till("zm_settings_menu_complete");
+
 	if(level.mainquestdebug)
 	{
 		wait(2);
@@ -454,7 +456,7 @@ function tempbuyableending()
 	wait(0.05);
 	box2 EnableLinkTo();
 	box2 LinkTo(box);
-	//IPrintLnBold("The souls have awakened");
+	IPrintLnBold("The souls have awakened");
 	box PlayLoopSound("box_rise_loop", 0.5);
 	boxpath = struct::get(box.target, "targetname");
 	box MoveTo(boxpath.origin, 3);
@@ -509,7 +511,7 @@ function tempbuyableending()
 			if(player.score < buyableendingincrement)
 			{
 				//first lets check if their score is enough to completely pay for the remaining ending balance
-				if(player.score => buyableendingcost)
+				if(player.score >= buyableendingcost)
 				{
 					//if this is the case we take the remaining ending balance from their points
 					player zm_score::minus_to_player_score(buyableendingcost);
@@ -527,7 +529,7 @@ function tempbuyableending()
 				
 			}
 			//if the players' score is greater than or equal to the buyable ending increment
-			else if(player.score => buyableendingincrement)
+			else if(player.score >= buyableendingincrement)
 			{
 				//if the increment is more than the remaining cost of the buyable ending
 				if(buyableendingincrement > buyableendingcost)
@@ -546,6 +548,7 @@ function tempbuyableending()
 					player zm_score::minus_to_player_score(buyableendingincrement); 
 				}
 			}
+		}
 		//we check now if the remaining cost is less than or equal to zero(this value shouldn't be zero, unless there is a logic error in this code.). If the cost is zero or less break the loop.
 		if(buyableendingcost <= 0) break;
 		wait(0.05);
@@ -2348,7 +2351,7 @@ function eegatewaydeliversetup()
 	wait(2);
 	gatewaydoors[0] PlaySound("vox_unknown_findwhatsmissing");
 	//gatewaydoors[1] PlayLoopSound("mozartscary", 0.5);
-	thread zm_subtitles::subtitle_display(undefined, 3, "^1Unknown", "find the missing ingredient.");
+	thread zm_subtitles::subtitle_display(undefined, 3, "^3Unknown", "^3find the missing ingredient.");
 	wait(15);
 	randint = RandomInt(gatewaydoors.size);
 	doorclip = GetEnt(gatewaydoors[randint].target, "targetname");

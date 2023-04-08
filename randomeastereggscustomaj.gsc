@@ -195,6 +195,7 @@ function typewriterjackee()
 	fxModel = util::spawn_model("tag_origin", trig.origin);
 	specialrewarditcount = 7;
 	e_bool = false;
+	payout = false;
 	firstrew = 0;
 	choices = 0;
 	//level waittill("initial_blackscreen_passed");
@@ -215,9 +216,9 @@ function typewriterjackee()
 			choices = 2 + iteration;
 		}
 		if(choices > 7) choices = 7;
-		if(choices >= specialrewarditcount)
+		if(choices >= specialrewarditcount && !payout)
 		{
-			if(RandomInt(5) == 0 || firstrew == 0) 
+			if(RandomInt(2) == 0 || firstrew % 7 == 0) 
 			{
 				e_bool = true;
 				firstrew ++;
@@ -2764,7 +2765,7 @@ function spawnihopitem()
 	deliveryitemfx = util::spawn_model("tag_origin", deliveryitem.origin);
 	deliveryitemfx EnableLinkTo();
 	deliveryitemfx LinkTo(deliveryitem);
-	WAIT_SERVER_FRAME;
+	wait(0.05);
 	thread PlayFxWithCleanup(level.meteorspawnfx, deliveryitem.origin, 3);
 	PlaySoundAtPosition("portalexplodesee", deliveryitem.origin);
 	wait(0.2);

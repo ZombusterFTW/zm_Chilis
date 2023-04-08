@@ -451,14 +451,13 @@ function autoexec sussyfuelpc()
 	wait(0.1);
 	trig PlaySound("defaultfail");
 	pcmodel SetModel("p7_zur_register_store_monitor_accessdenied");
-	trig SetHintString("ACCESS DENIED, you can play it in room [REDACTED]");
-	thread zm_subtitles::subtitle_display(undefined, 3, "^0Unknown", "Find the room number...");
+	trig SetHintString("ACCESS DENIED, you can play it in room 237");
+	thread zm_subtitles::subtitle_display(undefined, 3, "^0Unknown", "Go to room 237...");
 	//spawn in items themed, genshin, dinothunder, and rimiru
 	room236door = GetEnt("kaz_room_door", "targetname");
 	room236clip = GetEnt("kazroomclip", "targetname");
 	gunspawnspot = struct::get("animegunspawn", "targetname");
-	level thread cameronframessequence(cameronframes3, framehints);
-	level waittill("allcameronframesfound");
+	//level waittill("allcameronframesfound");
 	animegun = util::spawn_model("wpn_t7_zmb_hd_stg44_view_rim", gunspawnspot.origin);
 	animegun thread gunspin(3, "animegungrabbed");
 	animegunfx = util::spawn_model("tag_origin", gunspawnspot.origin);
@@ -474,9 +473,13 @@ function autoexec sussyfuelpc()
 	room236door RotateTo(room236door.script_angles, 2);
 	room236door PlaySound("dooropen");
 	trigger = GetEnt("pickupanimegun", "targetname");
-    trigger SetHintString( "Hold ^2[{+activate}]^7 To Receive Rimiru's Tempest" );
+    trigger SetHintString( "Find the frames to unlock..." );
     trigger SetCursorHint( "HINT_NOICON" );
     trigger UseTriggerRequireLookAt();
+    level thread cameronframessequence(cameronframes3, framehints);
+    level waittill("allcameronframesfound");
+    trigger SetHintString( "Hold ^2[{+activate}]^7 To Receive Rimiru's Tempest" );
+    trigger SetCursorHint( "HINT_NOICON" );
     trigger waittill("trigger", player);
     player PlayLocalSound("buypickup");
     animegunfx Delete();
@@ -541,7 +544,7 @@ function cameronframessequence(cameronframes3, numberarray)
 	PlaySoundAtPosition("sg_success", (0,0,0));
 	wait(1);
 	PlaySoundAtPosition("vox_tempest_final", (0,0,0));
-	thread zm_subtitles::subtitle_display(undefined, 3, "^0Unknown", "That is the room...");
+	thread zm_subtitles::subtitle_display(undefined, 3, "^0Unknown", "The seal has been broken...");
 	level waittill("animegungrabbed");
 
 	foreach(frame in cameronframes3)
